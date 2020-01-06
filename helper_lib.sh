@@ -37,72 +37,6 @@ get_command_line_args() {
   done
 }
 
-# Extract the cumulative command line arguments for the docker daemon
-#
-# If specified multiple times, all matches are returned.
-# Accounts for long and short variants, call with short option.
-# Does not account for option defaults or implicit options.
-get_docker_cumulative_command_line_args() {
-  OPTION="$1"
-
-  if ! get_command_line_args "docker daemon" >/dev/null 2>&1 ; then
-    line_arg="docker daemon"
-  else
-    line_arg="dockerd"
-  fi
-
-  get_command_line_args "$line_arg" |
-  # normalize known long options to their short versions
-  sed \
-    -e 's/\-\-debug/-D/g' \
-    -e 's/\-\-host/-H/g' \
-    -e 's/\-\-log-level/-l/g' \
-    -e 's/\-\-version/-v/g' \
-    |
-    # normalize parameters separated by space(s) to -O=VALUE
-    sed \
-      -e 's/\-\([DHlv]\)[= ]\([^- ][^ ]\)/-\1=\2/g' \
-      |
-    # get the last interesting option
-    tr ' ' "\n" |
-    grep "^${OPTION}" |
-    # normalize quoting of values
-    sed \
-      -e 's/"//g' \
-      -e "s/'//g"
-}
-
-# Extract the effective command line arguments for the docker daemon
-#
-# Accounts for multiple specifications, takes the last option.
-# Accounts for long and short variants, call with short option
-# Does not account for option default or implicit options.
-get_docker_effective_command_line_args() {
-  OPTION="$1"
-  get_docker_cumulative_command_line_args "$OPTION" | tail -n1
-}
-
-get_docker_configuration_file() {
-  FILE="$(get_docker_effective_command_line_args '--config-file' | \
-    sed 's/.*=//g')"
-
-  if [ -f "$FILE" ]; then
-    CONFIG_FILE="$FILE"
-  elif [ -f '/etc/docker/daemon.json' ]; then
-    CONFIG_FILE='/etc/docker/daemon.json'
-  else
-    CONFIG_FILE='/dev/null'
-  fi
-}
-
-get_docker_configuration_file_args() {
-  OPTION="$1"
-
-  get_docker_configuration_file
-
-  grep "$OPTION" "$CONFIG_FILE" | sed 's/.*://g' | tr -d '" ',
-}
-
 get_systemd_service_file() {
   SERVICE="$1"
 
@@ -199,7 +133,7 @@ check_L2() {
   info "$check_L2"
 }
 
-check_ennd(){
+check_end(){
   endsectionjson
 }
 
@@ -207,9 +141,9 @@ yell_info() {
 yell "# ------------------------------------------------------------------------------
 # Red Hat Bench for Security v$version
 #
-# Based on Docker, Inc. (c) 2015-
+# Based on Docker, Inc. (c) 2015-2019
 #
-# Checks for dozens of common best-practices around deploying Docker containers in production.
-# Inspired by the CIS Redhat 7 Benchmark v2.2.0.
+# Checks for dozens of common best-practices around Red Hat Enterprise Linux in production.
+# Inspired by the CIS Redhat 7 Benchmark v2.2.0 and docker bench security.
 # ------------------------------------------------------------------------------"
 }

@@ -7,7 +7,7 @@
 # Checks for dozens of common best-practices around deploying Docker containers in production.
 # ------------------------------------------------------------------------------
 
-version='1.3.5'
+version='2.2'
 
 # Load dependencies
 . ./helper_lib.sh
@@ -24,16 +24,10 @@ readonly myname
 export PATH="$PATH:/bin:/sbin:/usr/bin:/usr/local/bin:/usr/sbin/"
 
 # Check for required program(s)
-req_progs='awk docker grep ss stat'
+req_progs='awk grep ss stat'
 for p in $req_progs; do
   command -v "$p" >/dev/null 2>&1 || { printf "%s command not found.\n" "$p"; exit 1; }
 done
-
-# Ensure we can connect to docker daemon
-if ! docker ps -q >/dev/null 2>&1; then
-  printf "Error connecting to docker daemon (does docker ps work?)\n"
-  exit 1
-fi
 
 usage () {
   cat <<EOF
@@ -94,7 +88,6 @@ beginjson "$version" "$(date +%s)"
 # Load all the tests from tests/ and run them
 main () {
   # Get configuration location
-  get_docker_configuration_file
 
   # If there is a container with label docker_bench_security, memorize it:
   benchcont="nil"
