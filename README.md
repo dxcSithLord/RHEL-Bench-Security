@@ -1,6 +1,6 @@
 # RedHat Bench for Security
 
-![RedHat Bench for Security running](https://raw.githubusercontent.com/docker/docker-bench-security/master/benchmark_log.png "Docker Bench for Security running")
+![RedHat Bench for Security running](https://raw.githubusercontent.com/dxcSithLord/RHEL-Bench-Security/master/benchmark_log.png "RHEL 7 Bench for Security running")
 
 This work is based on the Docker Bench for Security and uses the same structure
 for tests and results.
