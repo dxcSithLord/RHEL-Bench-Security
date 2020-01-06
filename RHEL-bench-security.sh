@@ -10,8 +10,8 @@
 version='1.3.5'
 
 # Load dependencies
-. ./functions_lib.sh
 . ./helper_lib.sh
+. ./functions_lib.sh
 
 # Setup the paths
 this_path=$(abspath "$0")       ## Path of this file including filename
