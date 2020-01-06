@@ -19,7 +19,7 @@ check_3_1() {
 
 check_3_1_1() {
   retval=0
-  sysctl net.ipv4.ip_forward | if grep -E "net.ipv4.ip_forward([  ]*=[  ]0[  ]"; then
+   if sysctl net.ipv4.ip_forward | grep -E "net.ipv4.ip_forward([  ]*=[  ]0[  ]"; then
     retval=$((retval + 0))
     # net.ipv4.ip_forward = 0
   else

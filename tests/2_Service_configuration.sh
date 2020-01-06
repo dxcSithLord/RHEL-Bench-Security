@@ -1,71 +1,6 @@
 #!/bin/sh
-chk_file="tmp/chkconfig_$$.list"
-sys_file="/tmp/systemctl_$$.list"
-rpm_file="/tmp/rpm_$$.list"
 
 
-test_config(){
-# expect $1 as a space separated list
-  if [ ! -f $chk_file ]; then
-    chkconfig --list | sort > "$chk_file"
-  fi
-  config_name_list=$1
-  retval=0
-  for svcname in $config_name_list; do
-    if grep -c "$svcname" $chk_file -eq 0; then
-      retval=$((retval+0))
-    else
-      if grep "$svcname" $chk_file | grep -cw "[0-6]:on" -eq 0; then
-        retval=$((retval+0))
-      else
-        retval=$((retval+1))
-      fi
-    fi
-  done
-  return $retval
-}
-
-test_service(){
-# expect $1 as a space separated list
-  if [ ! -f $sys_file ]; then
-    systemctl list-unit-files | sort > "$sys_file"
-  fi
-  service_name_list=$1
-  retval=0
-  for svcname in $service_name_list; do
-    if grep -c "$svcname" $sys_file -eq 0; then
-      retval=$((retval+0))
-    else
-      if grep "$svcname" $sys_file | grep -cw "[0-6]:on" -eq 0; then
-        retval=$((retval+0))
-      else
-        retval=$((retval+1))
-      fi
-    fi
-  done
-  return $retval
-}
-
-test_package(){
-# expect $1 as a space separated list
-  if [ ! -f $rpm_file ]; then
-    rpm -q -a --qf '%{name}.%-7{arch}\n' | sort > "$rpm_file"
-  fi
-  package_name_list=$1
-  retval=0 # count of installed packges
-  for pkgname in $package_name_list; do
-    if grep -c "$pkgname" $rpm_file -eq 0; then
-      retval=$((retval+0))
-    else
-      if  grep "$pkgname" $rpm_file | grep -cw "[0-6]:on" -eq 0; then
-        retval=$((retval+0))
-      else
-        retval=$((retval+1))
-      fi
-    fi
-  done
-  return $retval
-}
 
 check_2_1_1() {
   #chkconfig --list
@@ -169,6 +104,7 @@ check_2_2_1_1() {
 }
 
 check_2_2_1_2() {
+  retval=0
 
   if [ -f /etc/ntp.conf ]; then
     grep "^restrict" /etc/ntp.conf
@@ -180,22 +116,26 @@ check_2_2_1_2() {
     logit "/etc/ntp.conf does not exisst"
   fi
   if [ -f /etc/sysconfig/ntpd ]; then
-    grep "^OPTIONS" /etc/sysconfig/ntpd
-  # OPTIONS="-u ntp:ntp"
+    if grep "^OPTIONS" /etc/sysconfig/ntpd; then
+    # OPTIONS="-u ntp:ntp"
+      retval=0
+    else
+      retval=1
+    fi
   else
     logit "/etc/sysconfig/ntpd dioes not exist"
   fi
   if [ -f /usr/lib/systemd/system/ntpd.service ]; then
-    grep "^ExecStart" /usr/lib/systemd/system/ntpd.service
+    if grep "^ExecStart" /usr/lib/systemd/system/ntpd.service; then
+      retval=0
+    else
+      retval=1
+    fi
     # ExecStart=/usr/sbin/ntpd -u ntp:ntp $OPTIONS
   else
     logit "/usr/lib/systemd/system/ntpd.service does not exist"
   fi
-  if $x -eq $x; then
-    retval=0
-  else
-    retval=1
-  fi
+  retval=1
   return $retval
 }
 
@@ -322,18 +262,15 @@ check_2_2_14() {
 check_2_2_15() {
   retval=1
 # SMTP port 25 only on local address
-  if <test netstat command exists> then
-    netstat -an | grep LIST | grep ":25[[:space:]]"
+  if command -v "netstat" >/dev/null 2>&1; then
+    netstat -an | grep LISTEN | grep ":25[[:space:]]"
 # need to test for the following LISTEN port
     # tcp 0 0 127.0.0.1:25 0.0.0.0:* LISTEN
   else
-    if <test ss comman exists> then
-      ss -an | grep LIST | grep ":25[[:space:]]"
-      # tcp LISTEN 0 100 127.0.0.1:25 *.*
-      # tcp LISTEN 0 100 [::1]]:25 [::]:*
-    else
-      logit "Unable to test network settings, as neither netstat or ss commands installed"
-    fi
+    #  ss is a prerequisite
+    ss -an | grep LISTEN | grep ":25[[:space:]]"
+    # tcp LISTEN 0 100 127.0.0.1:25 *.*
+    # tcp LISTEN 0 100 [::1]]:25 [::]:*
   fi
   return $retval
 }

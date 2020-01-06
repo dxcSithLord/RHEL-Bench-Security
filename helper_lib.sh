@@ -48,6 +48,74 @@ get_systemd_service_file() {
     echo "/usr/lib/systemd/system/$SERVICE"
   fi
 }
+# temporary files to hold the current settings - avoids repeated calls to
+# expensive function.
+chk_file="tmp/chkconfig_$$.list"
+sys_file="/tmp/systemctl_$$.list"
+rpm_file="/tmp/rpm_$$.list"
+
+test_config(){
+# expect $1 as a space separated list
+  if [ ! -f $chk_file ]; then
+    chkconfig --list | sort > "$chk_file"
+  fi
+  config_name_list=$1
+  retval=0
+  for svcname in $config_name_list; do
+    if grep -c "$svcname" $chk_file -eq 0; then
+      retval=$((retval+0))
+    else
+      if grep "$svcname" $chk_file | grep -cw "[0-6]:on" -eq 0; then
+        retval=$((retval+0))
+      else
+        retval=$((retval+1))
+      fi
+    fi
+  done
+  return $retval
+}
+
+test_service(){
+# expect $1 as a space separated list
+  if [ ! -f $sys_file ]; then
+    systemctl list-unit-files | sort > "$sys_file"
+  fi
+  service_name_list=$1
+  retval=0
+  for svcname in $service_name_list; do
+    if grep -c "$svcname" $sys_file -eq 0; then
+      retval=$((retval+0))
+    else
+      if grep "$svcname" $sys_file | grep -cw "[0-6]:on" -eq 0; then
+        retval=$((retval+0))
+      else
+        retval=$((retval+1))
+      fi
+    fi
+  done
+  return $retval
+}
+
+test_package(){
+# expect $1 as a space separated list
+  if [ ! -f $rpm_file ]; then
+    rpm -q -a --qf '%{name}.%-7{arch}\n' | sort > "$rpm_file"
+  fi
+  package_name_list=$1
+  retval=0 # count of installed packges
+  for pkgname in $package_name_list; do
+    if grep -c "$pkgname" $rpm_file -eq 0; then
+      retval=$((retval+0))
+    else
+      if  grep "$pkgname" $rpm_file | grep -cw "[0-6]:on" -eq 0; then
+        retval=$((retval+0))
+      else
+        retval=$((retval+1))
+      fi
+    fi
+  done
+  return $retval
+}
 
 #
 # This is a generic replacement for all the "check_*" functions that repeat most of the same code

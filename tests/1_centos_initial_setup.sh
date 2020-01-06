@@ -281,10 +281,10 @@ EOF
 # check mount point
 # check mount point for options
 
-echo
-cat - <<EOF
+#echo
+#cat - <<EOF
 # 1.1.21 Ensure sticky bit is set on all world-writable directories
-EOF
+#EOF
 check_1_1_21() {
 
   found=0
@@ -327,10 +327,10 @@ remedy_1_1_22() {
 
 }
 
-cat - <<EOF
+#cat - <<EOF
 # 1.2.1 Ensure package manager repositories are configured
 # 1.2.2 Ensure gpgcheck is globally activated
-EOF
+#EOF
 #check_1_2_1() {
 #  id_1_2_1="1.2.1"
 #  desc_1_2_1="Disable Automounting"
@@ -389,9 +389,9 @@ check_1_2_3() {
   echo "Verifying global activation of gpgcheck:"
 
   echo
-  cat - <<EOF
+#  cat - <<EOF
 # 1.2.3 Ensure GPG keys are installed
-EOF
+#EOF
 
   echo "Verifying Red Hat GPG keys ... "
   if rpm -q gpg-pubkey --qf '%{name}-%{version}-%{release} --> %{summary}\n'; then
@@ -403,9 +403,9 @@ EOF
 }
 
 echo
-cat - <<EOF
+#cat - <<EOF
 # 1.2.5 Disable the rhnsd Daemon
-EOF
+#EOF
 check_1_2_5(){
   chkconfig --list rhnsd
 for service in autofs rhnsd; do
@@ -437,9 +437,9 @@ check_1_3_2() {
   return $retval
 }
 echo
-cat - <<EOF
+#cat - <<EOF
 # 1.4.1 Ensure permissions on bootloader config are configured
-EOF
+#EOF
 check_1_4() {
   logit ""
   id_1_4="1.4"
@@ -463,45 +463,78 @@ check_1_4_1(){
     echo "$file already has permissions 0600"
   fi
 }
-echo
-cat - <<EOF
+#cat - <<EOF
 # 1.4.3 Ensure authentication required for single user mode
-EOF
-file="/usr/lib/systemd/system/rescue.service"
-printf "Checking if authentication is required in rescue mode ... "
-if grep -q "^ExecStart.*/sbin/sulogin" $file; then
-  echo yes
-else
-  printf "no, enabling ... "
-  sed -i -e 's%^\(ExecStart=\).*%\1-/bin/sh -c "/usr/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"%' $file && echo ok || echo error
-fi
-
-echo
-cat - <<EOF
-# 1.5.3 Ensure address space layout randomization (ASLR) is enabled
-EOF
-file="/etc/sysctl.conf"
-for parm in kernel.randomize_va_space; do
-  printf "Checking status of sysctl variable %s ... " "${parm}"
-  if $(sysctl -n "${parm}") -ne 2; then
-    printf "disabled, enabling ... "
-    sysctl -q -w ${parm}=2 && echo ok || echo error
-    if grep -q ${parm} $file; then
-      sed -i -e "s/^$parm.*/$parm = 2/" $file
-    else
-      echo "$parm = 2" >>$file
-    fi
+#EOF
+check_1_4_3(){
+  retval=0
+  file="/usr/lib/systemd/system/rescue.service"
+  if grep -q "^ExecStart.*/sbin/sulogin" $file; then
+    retval=1
   else
-    echo "enabled"
+    printf "no, enabling ... "
+    sed -i -e 's%^\(ExecStart=\).*%\1-/bin/sh -c "/usr/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"%' $file && echo ok || echo error
   fi
-done
+  return $retval
+}
+remedy_1_4_3(){
+  retval=0
+  if grep -q "^ExecStart.*/sbin/sulogin" $file; then
+    retval=1
+  else
+    printf "no, enabling ... "
+    sed -i -e 's%^\(ExecStart=\).*%\1-/bin/sh -c "/usr/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"%' $file && echo ok || echo error
+  fi
+  return $retval
 
+}
 echo
-cat - <<EOF
+#cat - <<EOF
+# 1.5.3 Ensure address space layout randomization (ASLR) is enabled
+#EOF
+check_1_5_3(){
+  retval=0
+  file="/etc/sysctl.conf"
+  parm="kernel.randomize_va_space"
+  if $(sysctl -n "${parm}") -ne 2; then
+    retval=1
+  fi
+  return $retval
+}
+
+remedy_1_5_3(){
+    printf "Checking status of sysctl variable %s ... " "${parm}"
+    if $(sysctl -n "${parm}") -ne 2; then
+      printf "disabled, enabling ... "
+      sysctl -q -w ${parm}=2 && echo ok || echo error
+      if grep -q ${parm} $file; then
+        sed -i -e "s/^$parm.*/$parm = 2/" $file
+      else
+        echo "$parm = 2" >>$file
+      fi
+    fi
+}
+#cat - <<EOF
 # 1.5.4 Ensure prelink is disabled
 # 1.6.1.4 Ensure SETroubleshoot is not installed
 # 1.6.1.5 Ensure the MCS Translation Service (mcstrans) is not installed
-EOF
+#EOF
+check_1_5_4(){
+  retval=0
+  retval=test_package "prelink"
+  return $retval
+}
+check_1_6_1_4(){
+  retval=0
+  retval=test_package "setroubleshoot"
+  return $retval
+}
+check_1_6_1_5(){
+  retval=0
+  retval=test_package "mctrans"
+  return $retval
+}
+remedy_1_5_4(){
 for pkg in prelink setroubleshoot mctrans; do
   printf "Checking if package %s exists ... " "${pkg}"
   if rpm -q --quiet ${pkg}; then
@@ -512,31 +545,81 @@ for pkg in prelink setroubleshoot mctrans; do
   fi
 done
 
-echo
-cat - <<EOF
+}
+#cat - <<EOF
 # 1.7.1.1 Ensure message of the day is configured properly
 # 1.7.1.2 Ensure local login warning banner is configured properly
 # 1.7.1.3 Ensure remote login warning banner is configured properly
-EOF
-for file in /etc/motd /etc/issue /etc/issue.net; do
-  printf "Checking if OS information is present in %s ... " "$file"
+#EOF
+check_1_7_1_1(){
+  retval=0
+  file="/etc/motd"
   if grep -E -q '(\\v|\\r|\\m|\\s)' "$file"; then
-    echo "yes, should be removed"
-  else
-    echo no
+    retval=1
   fi
-done
-
-echo
-cat - <<EOF
+  return $retval
+}
+check_1_7_1_2(){
+  retval=0
+  file="/etc/issue"
+  if grep -E -q '(\\v|\\r|\\m|\\s)' "$file"; then
+    retval=1
+  fi
+  return $retval
+}
+check_1_7_1_3(){
+  retval=0
+  file="/etc/issue.net"
+  if grep -E -q '(\\v|\\r|\\m|\\s)' "$file"; then
+    retval=0
+  fi
+  return $retval
+}
+#cat - <<EOF
 # 1.7.1.4 Ensure permissions on /etc/motd are configured
 # 1.7.1.5 Ensure permissions on /etc/issue are configured
 # 1.7.1.6 Ensure permissions on /etc/issue.net are configured
-EOF
+#EOF
+check_1_7_1_4(){
+  retval=0
+  file="/etc/motd"
+  mode="644"
+  uid="0"
+  gid="0"
+  if stat -c "%a %u %g" "$file" \| grep -qv "$mode $uid $gid"; then
+    retval=1
+  fi
+  return $retval
+}
+
+check_1_7_1_5(){
+  retval=0
+  file="/etc/issue"
+  mode="644"
+  uid="0"
+  gid="0"
+  if stat -c "%a %u %g" "$file" \| grep -qv "$mode $uid $gid"; then
+    retval=1
+  fi
+  return $retval
+}
+check_1_7_1_6(){
+  retval=0
+  file="/etc/issue.net"
+  mode="644"
+  uid="0"
+  gid="0"
+  if  stat -c "%a %u %g" "$file" \| grep -qv "$mode $uid $gid"; then
+    retval=1
+  fi
+  return $retval
+}
+
+
+remedy_1_7_1_4(){
 echo "/etc/motd 644 0 0
 /etc/issue 644 0 0
 /etc/issue.net 644 0 0" | while read -r file mode uid gid; do
-  printf "Checking if %s has mode %s and owned by %s:%s ... " "$file" "$mode" "$uid" "$gid"
   stat -c "%a %u %g" "$file" | if grep -qv "$mode $uid $gid"; then
     printf "no, changing ... "
     chown "$uid":"$gid" "$file" && chmod "$mode" "$file" && echo ok || echo error
@@ -544,3 +627,5 @@ echo "/etc/motd 644 0 0
     echo yes
   fi
 done
+
+}
