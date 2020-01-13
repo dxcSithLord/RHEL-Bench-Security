@@ -151,7 +151,7 @@ test_package(){
 # generate a warning
 
 make_check() {
-  if echo "$1" | grep -cwE '^[1-9][0-9]*(_[1-9][0-9]*)*$' -eq 1; then
+  if echo "$1" \| grep -cwE '^[1-9][0-9]*(_[1-9][0-9]*)*$' -eq 1; then
     check_ref=$(echo "$1" | sed -e "s/_/./g")
     id_ref="$1"
     desc_ref="$2"

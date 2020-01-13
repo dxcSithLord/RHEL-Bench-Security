@@ -30,7 +30,7 @@ test_mount_point() {
   totalChecks=$((totalChecks + 1))
   #do_version_check "$docker_current_version" "$docker_version"
 
-  if mount | grep "${subfs}" >/dev/null 2>&1; then
+  if mount \| grep "${subfs}" >/dev/null 2>&1; then
     retval=0
   fi
   return $retval
@@ -47,7 +47,7 @@ test_mount_opt() {
   # up to zero or more comma [,]*
   # followed by the keyword and zero or more comma ${opts}[,]*
   # followed by any number of characters up to close paren  \(.*\))
-  if mount | grep -q "/${1} \(.*\)(\(.*\)[,]*${opts}[,]*\(.*\))"; then
+  if mount \| grep -q "/${1} \(.*\)(\(.*\)[,]*${opts}[,]*\(.*\))"; then
     retval=0
   fi
   return $retval
@@ -429,7 +429,7 @@ check_1_3_1() {
 }
 
 check_1_3_2() {
-  if sudo crontab -l | grep aide > /dev/null 2>&1; then
+  if sudo crontab -l \| grep aide > /dev/null 2>&1; then
     retval=0
   else
     retval=1
@@ -620,7 +620,7 @@ remedy_1_7_1_4(){
 echo "/etc/motd 644 0 0
 /etc/issue 644 0 0
 /etc/issue.net 644 0 0" | while read -r file mode uid gid; do
-  stat -c "%a %u %g" "$file" | if grep -qv "$mode $uid $gid"; then
+   if stat -c "%a %u %g" "$file" \| grep -qv "$mode $uid $gid"; then
     printf "no, changing ... "
     chown "$uid":"$gid" "$file" && chmod "$mode" "$file" && echo ok || echo error
   else
