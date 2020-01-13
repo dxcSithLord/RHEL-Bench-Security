@@ -1,0 +1,4 @@
+/dev/mapper/centos-home          on /home          type ext4 (rw,nodev,relatime,data=ordered)
+/dev/mapper/centos-var_log       on /var/log       type ext4 (rw,relatime,data=ordered)
+/dev/mapper/centos-var_log_audit on /var/log/audit type ext4 (rw,relatime,data=ordered)
+/dev/mapper/centos-var_tmp       on /var/tmp       type ext4 (rw,nosuid,nodev,noexec,relatime)

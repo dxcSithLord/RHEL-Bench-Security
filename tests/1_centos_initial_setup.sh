@@ -6,10 +6,12 @@ test_filesystems() {
   if [ $# -eq 1 ]; then
     # check that there is an argument
     # if modprobe command errors, lsmod is not executed
-    res1=$(modprobe -n -v "$1" 2>/dev/null)
+    # perhaps also check ls -d "/lib/modules/$(uname -r)/kernel/fs/$1" to see
+    #  if the kernel module is available on this system
+    res1=$(modprobe -n -v "$1" 2>/dev/null || echo "not in kernel")
     res2=$(lsmod | grep "$1")
     if [ -n "${res1}" ]; then
-      # something there
+      # something there - if nothing, then fail
       if [ "$res1" = "install /bin/true" ]; then
         if [ -z "${res2}" ]; then
           ret=0
