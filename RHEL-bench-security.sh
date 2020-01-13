@@ -10,8 +10,8 @@
 version='2.2'
 
 # Load dependencies
-. ./helper_lib.sh
-. ./functions_lib.sh
+. ./includes/helper_lib.sh
+. ./includes/functions_lib.sh
 
 # Setup the paths
 this_path=$(abspath "$0")       ## Path of this file including filename
@@ -65,7 +65,7 @@ if [ -z "$logger" ]; then
 fi
 
 # Load output formating
-. ./output_lib.sh
+. ./includes/output_lib.sh
 
 yell_info
 
@@ -89,11 +89,11 @@ beginjson "$version" "$(date +%s)"
 main () {
   # Get configuration location
 
-  # If there is a container with label docker_bench_security, memorize it:
+  # If there is a container with label centos_bench_security, memorize it:
   benchcont="nil"
   for c in $(docker ps | sed '1d' | awk '{print $NF}'); do
     if docker inspect --format '{{ .Config.Labels }}' "$c" | \
-     grep -e 'docker.bench.security' >/dev/null 2>&1; then
+     grep -e 'centos.bench.security' >/dev/null 2>&1; then
       benchcont="$c"
     fi
   done
@@ -102,7 +102,7 @@ main () {
   benchimagecont="nil"
   for c in $(docker images | sed '1d' | awk '{print $3}'); do
     if docker inspect --format '{{ .Config.Labels }}' "$c" | \
-     grep -e 'docker.bench.security' >/dev/null 2>&1; then
+     grep -e 'centos.bench.security' >/dev/null 2>&1; then
       benchimagecont="$c"
     fi
   done
@@ -134,7 +134,7 @@ main () {
     cis
   elif [ -z "$check" ] && [ "$checkexclude" ]; then
     checkexcluded="$(echo ",$checkexclude" | sed -e 's/^/\^/g' -e 's/,/\$|/g' -e 's/$/\$/g')"
-    for c in $(grep -E 'check_[0-9]|check_[a-z]' functions_lib.sh | grep -vE "$checkexcluded"); do
+    for c in $(grep -E 'check_[0-9]|check_[a-z]' includes/functions_lib.sh | grep -vE "$checkexcluded"); do
       "$c"
     done
   else

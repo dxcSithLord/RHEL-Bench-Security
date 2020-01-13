@@ -39,7 +39,7 @@ and produce logs in the current directory named `docker-bench-security.sh.log.js
 and `docker-bench-security.sh.log`.
 The CIS based checks are named `check_<section>_<number>`, e.g. `check_2_6`
 and community contributed checks are named `check_c_<number>`.
-A complete list of checks are present in [functions_lib.sh](functions_lib.sh).
+A complete list of checks are present in [functions_lib.sh](includes/functions_lib.sh).
 
 `sh docker-bench-security.sh -l /tmp/docker-bench-security.sh.log -c check_2_2`
 will only run check `2.2 Ensure the logging level is set to 'info'`.

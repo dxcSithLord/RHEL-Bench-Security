@@ -2,11 +2,12 @@
 
 test_filesystems() {
   # test the availability of filesystem provided as $1
+  ret=1
   if [ $# -eq 1 ]; then
     # check that there is an argument
-    res1=$(modprobe -n -v "$1")
+    # if modprobe command errors, lsmod is not executed
+    res1=$(modprobe -n -v "$1" 2>/dev/null)
     res2=$(lsmod | grep "$1")
-    ret=1
     if [ -n "${res1}" ]; then
       # something there
       if [ "$res1" = "install /bin/true" ]; then
@@ -16,7 +17,6 @@ test_filesystems() {
       fi
     fi
   else
-    ret=1
     echo "Expecting single filesystem name - e.g. cramfs"
   fi
   return $ret
@@ -39,14 +39,12 @@ test_mount_opt() {
   retval=1
   printf "Checking %s mount option %s ... " "$1" "$2"
   opts=$2
-  # match /tmp followed by a space
+  # match mount point name - no leading "/" in $1, followed by a space
   # followed by a non-greedy any characters up to open paren " \(.*\)("
   # followed by any number of characters  \(.*\)
   # up to zero or more comma [,]*
   # followed by the keyword and zero or more comma ${opts}[,]*
   # followed by any number of characters up to close paren  \(.*\))
-  ##### DO I NEED TO ESCAPE ANY "/" in $1 ??? ######
-  ##### CODE TO BE VERIFIED #####
   if mount | grep -q "/${1} \(.*\)(\(.*\)[,]*${opts}[,]*\(.*\))"; then
     retval=0
   fi
