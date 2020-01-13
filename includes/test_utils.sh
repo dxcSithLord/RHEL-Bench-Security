@@ -630,61 +630,66 @@ test_ssh_access() {
   [[ -n "${deny_groups}" ]] || return
 }
 
-test_password_limits()
+test_password_limits() {
   local retval
+  local parm
+  local pvalue
+  local eqtest
   retval=0
   # minimul length, implies that it could be greater, this only tests for equality
-  echo "difok 3
-minlen 14 -1
-dcredit -1 0
-ocredit -1 0
-lcredit -1 0
-maxrepeat 2 1" | while read -r parm value great
-do
-  printf "Checking if %s option '%s' has value '%s' ... ", "$PWQUAL_CNF", ${parm}, ${value}
-  case "$great" in
+  # subshell when piped into while loop, so can't set retval=1 inside loop
+# while read -r parm value great
+#do
+  printf "Checking if %s option '%s' has value '%s' ... " "$PWQUAL_CNF" "${parm}" "${pvalue}"
+  case "$eqtest" in
     "1") # test for maximum value
       printf "Test for maximum"
-      if grep -E "^${parm}\s*=\s*[0-9]*\s*" $PWQUAL_CNF | awk -F'=' '{print $2}' | awk -v val=${value} '{if ($1 > val) {print "0"}' -eq "0"; then
+      if grep -E "^${parm}\s*=\s*[0-9]*\s*" "$PWQUAL_CNF" | awk -F'=' '{print $2}' | awk -v val="${pvalue}" '{if ($1 > val) {print "0"}' -eq "0"; then
         retval=1;
       fi ;;
     "0") # test for equality
       printf "Test for equality"
-      if grep -q "^${parm}\s*=\s*${value}$" "$PWQUAL_CNF"; then
-        retval=0;
-      else
+      if ! grep -Eq "^${parm}\s*=\s*${pvalue}$" "$PWQUAL_CNF"; then
         retval=1
       fi;;
     "-1") # test for minimum value;;
       printf "Test for minimum"
-      if grep -E "^${parm}\s*=\s*[0-9]*\s*" $PWQUAL_CNF | awk -F'=' '{print $2}' | awk -v val=${value} '{if ($1 < val) {print "0"}' -eq "0"; then
+      if grep -E "^${parm}\s*=\s*[0-9]*\s*" "$PWQUAL_CNF" | awk -F'=' '{print $2}' | awk -v val="${pvalue}" '{if ($1 < val) {print "0"}' -eq "0"; then
         retval=1;
       fi ;;
 
-    else) printf "test_password_limits - parameter error expected -1, 0 or 1, value passed : %s", $great;;
+    else) printf "test_password_limits - parameter error expected -1, 0 or 1, value passed : %s", "$eqtest";;
   esac
+#done
+return "$retval"
+}
 
-  if ; then
-    echo yes
+#test_password_limits "difok" "3" "0"
+test_password_limits "minlen" "14" "-1"
+test_password_limits "dcredit" "-1" "0"
+test_password_limits "ocredit" "-1" "0"
+test_password_limits "lcredit" "-1" "0"
+#test_password_limits "maxrepeat" "2" "1"
+
+remedy_PWQUAL_CNF(){
+
+  if grep -q "^${parm}[[:space:]]" "$PWQUAL_CNF"
+  then
+    # option exists but with different value
+    printf "changing ... "
+    sed -i -e "s/^\($parm\) .*/\1 = $value/" "$PWQUAL_CNF" && echo ok || echo error
+  elif grep -E -q "^#[[:space:]]{0,}${parm}[[:space:]]" "$PWQUAL_CNF"
+  then
+    # option exists but is commented
+    printf "changing ... "
+    sed -i -e "s/^#\?\s\{0,\}\($parm\) .*/\1 = $value/" "$PWQUAL_CNF" && echo ok || echo error
   else
-    printf "no, "
-    if grep -q "^${parm}[[:space:]]" "$PWQUAL_CNF"
-    then
-      # option exists but with different value
-      printf "changing ... "
-      sed -i -e "s/^\($parm\) .*/\1 = $value/" "$PWQUAL_CNF" && echo ok || echo error
-    elif grep -E -q "^#[[:space:]]{0,}${parm}[[:space:]]" "$PWQUAL_CNF"
-    then
-      # option exists but is commented
-      printf "changing ... "
-      sed -i -e "s/^#\?\s\{0,\}\($parm\) .*/\1 = $value/" "$PWQUAL_CNF" && echo ok || echo error
-    else
-      # option was not present, adding
-      printf "adding ... "
-      echo "${parm} = ${value}" >> "$PWQUAL_CNF" && echo ok || echo error
-    fi
+    # option was not present, adding
+    printf "adding ... "
+    echo "${parm} = ${value}" >> "$PWQUAL_CNF" && echo ok || echo error
   fi
-done
+
+}
 
 file="/etc/pam.d/system-auth"
 module="pam_pwquality.so"
