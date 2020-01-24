@@ -12,6 +12,7 @@ CHRONY_SYSCON='/etc/sysconfig/chronyd'
 LIMITS_CNF='/etc/security/limits.conf'
 SYSCTL_CNF='/etc/sysctl.conf'
 CENTOS_REL='/etc/centos-release'
+REDHAT_REL='/etc/redhat-release'
 HOSTS_ALLOW='/etc/hosts.allow'
 HOSTS_DENY='/etc/hosts.deny'
 CIS_CNF='/etc/modprobe.d/CIS.conf'
@@ -50,6 +51,7 @@ GDM_PROFILE='/etc/dconf/profile/gdm'
 GDM_BANNER_MSG='/etc/dconf/db/gdm.d/01-banner-message'
 RESCUE_SRV='/usr/lib/systemd/system/rescue.service'
 
+# This will cause the tests that take a long time (are slow) to be skipped
 if [[ "$BENCH_SKIP_SLOW" == "1" ]]; then
   DO_SKIP_SLOW=1
 else
@@ -78,40 +80,42 @@ test_system_file_perms() {
   dirs="$(rpm -Va --nomtime --nosize --nomd5 --nolinkto)"
   [[ -z "${dirs}" ]] || return
 }
-
+#
+# swapped  {''} order in awk statemments to  '{ }'
+#
 test_sticky_wrld_w_dirs() {
   local dirs
-  dirs="$(df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \))"
+  dirs="$(df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \))"
   [[ -z "${dirs}" ]] || return
 }
 
 test_wrld_writable_files() {
   local dirs
-  dirs="$(df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -0002)"
+  dirs="$(df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type f -perm -0002)"
   [[ -z "${dirs}" ]] || return
 }
 
 test_unowned_files() {
   local dirs
-  dirs="$(df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nouser)"
+  dirs="$(df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -nouser)"
   [[ -z "${dirs}" ]] || return
 }
 
 test_ungrouped_files() {
   local dirs
-  dirs="$(df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -nogroup)"
+  dirs="$(df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -nogroup)"
   [[ -z "${dirs}" ]] || return
 }
 
 test_suid_executables() {
   local dirs
-  dirs="$(df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -4000)"
+  dirs="$(df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type f -perm -4000)"
   [[ -z "${dirs}" ]] || return
 }
 
 test_sgid_executables() {
   local dirs
-  dirs="$(df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -2000)"
+  dirs="$(df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type f -perm -2000)"
   [[ -z "${dirs}" ]] || return
 }
 
@@ -134,12 +138,12 @@ test_yum_gpgcheck() {
 
 test_rpm_installed() {
   local rpm="${1}"
-  rpm -q ${rpm} | grep -qe "^${rpm}" || return
+  rpm -q "${rpm}" | grep -qe "^${rpm}" || return
 }
 
 test_rpm_not_installed() {
   local rpm="${1}"
-  rpm -q ${rpm} | grep -q "not installed" || return
+  rpm -q "${rpm}" | grep -q "not installed" || return
 }
 
 test_aide_cron() {
@@ -149,12 +153,12 @@ test_aide_cron() {
 test_file_perms() {
   local file="${1}"
   local pattern="${2}"  
-  stat -L -c "%a" ${file} | grep -qE "^${pattern}$" || return
+  stat -L -c "%a" "${file}" | grep -qE "^${pattern}$" || return
 }
 
 test_root_owns() {
   local file="${1}"
-  stat -L -c "%u %g" ${file} | grep -q '0 0' || return
+  stat -L -c "%u %g" "${file}" | grep -q '0 0' || return
 }
 
 test_grub_permissions() {
@@ -163,8 +167,8 @@ test_grub_permissions() {
 }
 
 test_boot_pass() {
-  grep -q 'set superusers=' "${GRUB_CFG}"
-  if [[ "$?" -ne 0 ]]; then
+  #  HERE - need to test this login - also too many return statements
+  if grep -q 'set superusers=' "${GRUB_CFG}" -ne 0; then
     grep -q 'set superusers=' ${GRUB_DIR}/* || return
     file="$(grep 'set superusers' ${GRUB_DIR}/* | cut -d: -f1)"
     grep -q 'password' "${file}" || return
@@ -180,7 +184,7 @@ test_auth_rescue_mode() {
 test_sysctl() {
   local flag="$1"
   local value="$2"
-  sysctl "${flag}" | cut -d= -f2 | tr -d '[[:space:]]' | grep -q "${value}" || return
+  sysctl "${flag}" | cut -d= -f2 | tr -d '[:space:]' | grep -q "${value}" || return
 }
 
 test_restrict_core_dumps() {
@@ -205,11 +209,11 @@ test_selinux_grubcfg() {
 }
 
 test_selinux_state() {
-  cut -d \# -f1 ${SELINUX_CFG} | grep 'SELINUX=' | tr -d '[[:space:]]' | grep -q 'SELINUX=enforcing' || return
+  cut -d \# -f1 ${SELINUX_CFG} | grep 'SELINUX=' | tr -d '[:space:]' | grep -q 'SELINUX=enforcing' || return
 }
 
 test_selinux_policy() {
-  cut -d \# -f1 ${SELINUX_CFG} | grep 'SELINUXTYPE=' | tr -d '[[:space:]]' | grep -q 'SELINUXTYPE=targeted' || return
+  cut -d \# -f1 ${SELINUX_CFG} | grep 'SELINUXTYPE=' | tr -d '[:space:]' | grep -q 'SELINUXTYPE=targeted' || return
 }
 
 test_unconfined_procs() {
@@ -220,33 +224,33 @@ test_unconfined_procs() {
 
 test_warn_banner() {
   local banner
-  banner="$(grep -E '(\\v|\\r|\\m|\\s)' ${1})"
+  banner="$(grep -E '(\\v|\\r|\\m|\\s)' "${1}")"
   [[ -z "${banner}" ]] || return
 }
 
 test_permissions_0644_root_root() {
   local file=$1
-  test_root_owns ${file} || return
-  test_file_perms ${file} 644 || return
+  test_root_owns "${file}" || return
+  test_file_perms "${file}" 644 || return
 }
 
 test_permissions_0600_root_root() {
   local file=$1
-  test_root_owns ${file} || return
-  test_file_perms ${file} 600 || return
+  test_root_owns "${file}" || return
+  test_file_perms "${file}" 600 || return
 }
 
 test_permissions_0000_root_root() {
   local file=$1
-  test_root_owns ${file} || return
-  test_file_perms ${file} 0 || return
+  test_root_owns "${file}" || return
+  test_file_perms "${file}" 0 || return
 }
 
 test_gdm_banner_msg() {
   if [[ -f "${BANNER_MSG}" ]] ; then
-    grep -E '[org/gnome/login-screen]' ${BANNER_MSG} || return
-    grep -E 'banner-message-enable=true' ${BANNER_MSG} || return
-    grep -E 'banner-message-text=' ${BANNER_MSG} || return
+    grep -E '[org/gnome/login-screen]' "${BANNER_MSG}" || return
+    grep -E 'banner-message-enable=true' "${BANNER_MSG}" || return
+    grep -E 'banner-message-text=' "${BANNER_MSG}" || return
   fi
 }
 
@@ -265,8 +269,8 @@ test_yum_check_update() {
 
 test_dgram_stream_services_disabled() {
   local service=$1
-  test_service_disable ${service}-dgram || return
-  test_service_disable ${service}-stream || return
+  test_service_disable "${service}-dgram" || return
+  test_service_disable "${service}-stream" || return
 }
 
 test_time_sync_services_enabled() {
@@ -295,9 +299,16 @@ test_nfs_rpcbind_services_disabled() {
 }
 
 test_mta_local_only() {
-  netstat_out="$(netstat -an | grep "LIST" | grep ":25[[:space:]]")"
+  local mynetstat
+  local netstat_out
+  if command -v netstat >/dev/null 2>&1; then
+    mynetstat="netstat"
+  else
+    mynetstat="ss"
+  fi
+    netstat_out="$($mynetstat -an | grep "LISTEN" | grep ":25[[:space:]]")"
   if [[ "$?" -eq 0 ]] ; then
-    ip=$(echo ${netstat_out} | cut -d: -f1 | cut -d" " -f4)
+    ip=$(echo "${netstat_out}" | cut -d: -f1 | cut -d" " -f4)
     [[ "${ip}" = "127.0.0.1" ]] || return    
   fi
 }
@@ -311,15 +322,15 @@ test_rsh_service_disabled() {
 test_net_ipv4_conf_all_default() {
   local suffix=$1
   local value=$2
-  test_sysctl "net.ipv4.conf.all.${suffix}" ${value} || return
-  test_sysctl "net.ipv4.conf.default.${suffix}" ${value} || return
+  test_sysctl "net.ipv4.conf.all.${suffix}" "${value}" || return
+  test_sysctl "net.ipv4.conf.default.${suffix}" "${value}" || return
 }
 
 test_net_ipv6_conf_all_default() {
   local suffix=$1
   local value=$2
-  test_sysctl "net.ipv6.conf.all.${suffix}" ${value} || return
-  test_sysctl "net.ipv6.conf.default.${suffix}" ${value} || return
+  test_sysctl "net.ipv6.conf.all.${suffix}" "${value}" || return
+  test_sysctl "net.ipv6.conf.default.${suffix}" "${value}" || return
 }
 
 test_ipv6_disabled() {
@@ -344,16 +355,15 @@ test_firewall_policy() {
 test_loopback_traffic_conf() {
   local accept="ACCEPT[[:space:]]+all[[:space:]]+--[[:space:]]+lo[[:space:]]+\*[[:space:]]+0\.0\.0\.0\/0[[:space:]]+0\.0\.0\.0\/0"
   local drop="DROP[[:space:]]+all[[:space:]]+--[[:space:]]+\*[[:space:]]+\*[[:space:]]+127\.0\.0\.0\/8[[:space:]]+0\.0\.0\.0\/0"
-  iptables -L INPUT -v -n | grep -E -q ${accept} || return
-  iptables -L INPUT -v -n | grep -E -q ${drop} || return
-  iptables -L OUTPUT -v -n | grep -E -q ${accept} || return
+  iptables -L INPUT -v -n | grep -E -q "${accept}" || return
+  iptables -L INPUT -v -n | grep -E -q "${drop}" || return
+  iptables -L OUTPUT -v -n | grep -E -q "${accept}" || return
 }
 
 test_wireless_if_disabled() {
   for i in $(iwconfig 2>&1 | grep -E -v "no[[:space:]]*wireless" | cut -d' ' -f1); do
-    ip link show up | grep "${i}:"
-    if [[ "$?" -eq 0 ]]; then
-    return 1
+    if ip link show up | grep "${i}:" -eq 0; then
+      return 1
     fi
   done
 }
@@ -363,13 +373,13 @@ test_audit_log_storage_size() {
 }
 
 test_dis_on_audit_log_full() {
-  cut -d\# -f2 ${AUDITD_CNF} | grep 'space_left_action' | cut -d= -f2 | tr -d '[[:space:]]' | grep -q 'email' || return
-  cut -d\# -f2 ${AUDITD_CNF} | grep 'action_mail_acct' | cut -d= -f2 | tr -d '[[:space:]]' | grep -q 'root' || return
-  cut -d\# -f2 ${AUDITD_CNF} | grep 'admin_space_left_action' | cut -d= -f2 | tr -d '[[:space:]]' | grep -q 'halt' || return
+  cut -d\# -f2 ${AUDITD_CNF} | grep 'space_left_action' | cut -d= -f2 | tr -d '[:space:]' | grep -q 'email' || return
+  cut -d\# -f2 ${AUDITD_CNF} | grep 'action_mail_acct' | cut -d= -f2 | tr -d '[:space:]' | grep -q 'root' || return
+  cut -d\# -f2 ${AUDITD_CNF} | grep 'admin_space_left_action' | cut -d= -f2 | tr -d '[:space:]' | grep -q 'halt' || return
 }
 
 test_keep_all_audit_info() {
-  cut -d\# -f2 ${AUDITD_CNF} | grep 'max_log_file_action' | cut -d= -f2 | tr -d '[[:space:]]' | grep -q 'keep_logs' || return
+  cut -d\# -f2 ${AUDITD_CNF} | grep 'max_log_file_action' | cut -d= -f2 | tr -d '[:space:]' | grep -q 'keep_logs' || return
 }
 
 test_audit_procs_prior_2_auditd() {
@@ -599,7 +609,7 @@ test_param() {
   local file="${1}" 
   local parameter="${2}" 
   local value="${3}" 
-  cut -d\# -f1 ${file} | grep -E -q "^${parameter}[[:space:]]+${value}" || return
+  cut -d\# -f1 "${file}" | grep -E -q "^${parameter}[[:space:]]+${value}" || return
 }
 
 test_ssh_param_le() {
@@ -690,25 +700,48 @@ remedy_PWQUAL_CNF(){
   fi
 
 }
-
+tobedone(){
 file="/etc/pam.d/system-auth"
 module="pam_pwquality.so"
 opts="try_first_pass local_users_only retry=3"
-if [ -h "$file" ]
-then
+if [ -h "$file" ]; then
   target=$(dirname $file)/$(file $file | awk '/symbolic link to/ { print $NF }' | sed -e "s/[\`']//g")
   [ -f "$target" ] && file="$target"
 fi
-printf "Checking if PAM module ${module} has '${opts}' ... "
+printf "Checking if PAM module %s has '%s' ... " "${module}" "${opts}"
 if grep -q "^password.*requisite.*${module}.*${opts}" $file
 then
   echo yes
 else
   printf "no, changing ... "
-  sed -i -e "/^password.*requisite.*$module/ s/^\(.*\.so\s\{1,\}\).*/\1$opts/" $file && echo ok || echo error
+  sed -i -e "/^password.*requisite.*$module/ s/^\(.*\.so\s\{1,\}\).*/\1$opts/" "$file" && echo ok || echo error
 fi
 
 }
+
+test_lock_after_n_password_fail(){
+  echo
+cat - << EOF
+# 5.3.2 Ensure lockout for failed password attempts is configured
+EOF
+local file
+local module
+local opts
+file="/etc/pam.d/system-auth"
+module="pam_faillock.so"
+opts="preauth audit silent deny=6 unlock_time=3600"
+if [ -h "$file" ]
+then
+  target=$(dirname $file)/$(file $file | awk '/symbolic link to/ { print $NF }' | sed -e "s/[\`']//g")
+  [ -f "$target" ] && file="$target"
+fi
+printf "Checking if PAM module %s has '%s' ... " "${module}" "${opts}"
+grep -q "^auth.*required.*${module}.*${opts}" "$file" && return
+# fix for failed test
+#  printf "no, changing ... "
+#  sed -i -e "/^auth.*required.*$module/ s/^\(.*\.so\s\{1,\}\).*/\1$opts/" $file && echo ok || echo error
+}
+
 test_wrapper() {
   local do_skip=$1
   shift
@@ -716,10 +749,11 @@ test_wrapper() {
   shift
   local func=$1
   shift
-  local args=$@
+  local args=$*
   if [[ "$do_skip" -eq 0 ]]; then
-    ${func} ${args} 
-    if [[ "$?" -eq 0 ]]; then
+    # Do not quote the args, as need the spaces to happen between arguments
+    # This assumes that all test arguments never have spaces
+    if ${func} ${args} -eq 0; then
       pass "${msg}"
     else
       warn "${msg}"

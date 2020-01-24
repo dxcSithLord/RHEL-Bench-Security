@@ -288,7 +288,7 @@ EOF
 check_1_1_21() {
 
   found=0
-  found="$(df --local -P | awk \{'if (NR!=1) print $6'\} | xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \) 2>/dev/null | wc -l)"
+  found="$(df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \) 2>/dev/null | wc -l)"
 
   if [ "$found" -eq 0 ]; then
     resval=0
