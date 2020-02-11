@@ -625,6 +625,54 @@ test_ssh_idle_timeout() {
   test_ssh_param_le ClientAliveCountMax 3 || return
 }
 
+test_ssh_ciphers(){
+  # 5.2.11  - Ensure only approved ciphers are used (Scored)
+  file=$SSHD_CFG
+  parm="Ciphers"
+  value="aes256-ctr,aes192-ctr,aes128-ctr"
+  printf "Checking if %s option '%s' has value '%s' ... " "$file" "${parm}" "${value}"
+  if grep -q "^${parm}[[:space:]]${value}$" $file
+  then
+    echo yes
+  else
+    printf "no, "
+  fi
+}
+fix_ssh_ciphers() {
+  file=$SSHD_CFG
+  parm="Ciphers"
+  value="aes256-ctr,aes192-ctr,aes128-ctr"
+  if grep -q "^${parm}[[:space:]]" $file
+  then
+    # option exists but with different value
+    printf "changing ... "
+    sed -i -e "s/^\($parm\) .*/\1 $value/" $file && echo ok || echo error
+  elif grep -Eq "^#[[:space:]]{0,}${parm}[[:space:]]" $file
+  then
+    # option exists but is commented
+    printf "changing ... "
+    sed -i -e "s/^#\?\s\{0,\}\($parm\) .*/\1 $value/" $file && echo ok || echo error
+  else
+    # option was not present, adding
+    printf "adding ... "
+    echo "${parm} ${value}" >> $file && echo ok || echo error
+  fi
+}
+
+test_5_2_11(){
+  #5.2.12  - Ensure only approved MAC algorithms are used (Scored)
+  grep "MACs" /etc/ssh/sshd_config
+  echo "expected result:"
+  echo "MACs hmac-sha2-512-etm@openssh.com,
+  hmac-sha2-256-etm@openssh.com,
+  umac-128etm@openssh.com,
+  hmac-sha2-512,
+  hmac-sha2-256,
+  umac-128@openssh.com,
+  curve25519sha256@libssh.org,
+  diffie-hellman-group-exchange-sha256"
+}
+
 test_ssh_access() {
   local allow_users
   local allow_groups

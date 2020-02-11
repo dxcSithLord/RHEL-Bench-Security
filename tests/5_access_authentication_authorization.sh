@@ -22,8 +22,8 @@ check_5() {
   test_wrapper 0 "5.2.8   - Ensure SSH root login is disabled (Scored)" test_param "${SSHD_CFG}" PermitRootLogin no
   test_wrapper 0 "5.2.9   - Ensure SSH PermitEmptyPasswords is disabled (Scored)" test_param "${SSHD_CFG}" PermitEmptyPasswords no
   test_wrapper 0 "5.2.10  - Ensure SSH PermitUserEnvironment is disabled (Scored)" test_param "${SSHD_CFG}" PermitUserEnvironment no
-  todo "5.2.11  - Ensure only approved ciphers are used (Scored)" 
-  todo "5.2.12  - Ensure only approved MAC algorithms are used (Scored)"
+  test_wrapper 0 "5.2.11  - Ensure only approved ciphers are used (Scored)" test_ssh_ciphers
+  test_wrapper 0 "5.2.12  - Ensure only approved MAC algorithms are used (Scored)"
   test_wrapper 0 "5.2.13  - Ensure SSH Idle Timeout Interval is configured (Scored)" test_ssh_idle_timeout
   test_wrapper 0 "5.2.14  - Ensure SSH LoginGraceTime is set to one minute or less (Scored)" test_ssh_param_le LoginGraceTime 60
   test_wrapper 0 "5.2.15  - Ensure SSH access is limited (Scored)" test_ssh_access
