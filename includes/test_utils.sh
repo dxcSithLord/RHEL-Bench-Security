@@ -627,18 +627,18 @@ test_ssh_idle_timeout() {
 
 test_ssh_ciphers(){
   # 5.2.11  - Ensure only approved ciphers are used (Scored)
+  local retval=1
   file=$SSHD_CFG
   parm="Ciphers"
   value="aes256-ctr,aes192-ctr,aes128-ctr"
   printf "Checking if %s option '%s' has value '%s' ... " "$file" "${parm}" "${value}"
-  if grep -q "^${parm}[[:space:]]${value}$" $file
-  then
-    echo yes
-  else
-    printf "no, "
+  if grep -q "^${parm}[[:space:]]${value}$" $file; then
+    retval=0
   fi
+  return $retval
 }
 fix_ssh_ciphers() {
+  local retval=1
   file=$SSHD_CFG
   parm="Ciphers"
   value="aes256-ctr,aes192-ctr,aes128-ctr"
@@ -661,6 +661,7 @@ fix_ssh_ciphers() {
 
 test_5_2_11(){
   #5.2.12  - Ensure only approved MAC algorithms are used (Scored)
+  local retval=1
   grep "MACs" /etc/ssh/sshd_config
   echo "expected result:"
   echo "MACs hmac-sha2-512-etm@openssh.com,
@@ -671,6 +672,8 @@ test_5_2_11(){
   umac-128@openssh.com,
   curve25519sha256@libssh.org,
   diffie-hellman-group-exchange-sha256"
+  # Need to test that there are no algorithms that are NOT in the above list.
+  # need to save to two sorted temp files then use comm to compare and expect the result to be empty
 }
 
 test_ssh_access() {

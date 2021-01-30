@@ -1,5 +1,18 @@
 #!/bin/env bash
+# Description: This script provides logging functions
+# All functions require a single parameter that will be printed.
+# logit : argument will be printed  without highlights
+# info :  "[INFO]" which will be in BLUE and bold highlight before the argument
+# pass : "[PASS]" which will be in GREEN and bold highlight before the argument
+# warn : "[WARN]" which will be in RED and bold highlight before the argument
+# note : "[NOTE]" which will be in YELLOW and bold highlight before the argument
+# todo : "[TODO]" which will be in MAGENTA and bold highlight before the argument
+# skip : "[SKIP]" which will be in CYAN and bold highlight before the argument
+# yell : prints the whole message argument in YELLOW and bold
 
+#
+# Define text colour sequqnces
+#
 BLDRED='\033[1;31m'
 BLDGRN='\033[1;32m'
 BLDBLU='\033[1;34m'
@@ -7,6 +20,10 @@ BLDYLW='\033[1;33m' # Yellow
 BLDMGT='\033[1;35m' # Magenta
 BLDCYN='\033[1;36m' # Cyan 
 TXTRST='\033[0m'
+
+#
+# To do : add argument checking to each function
+#
 
 logit () {
   printf "%b\n" "$1"
