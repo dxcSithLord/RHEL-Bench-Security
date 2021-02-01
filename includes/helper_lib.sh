@@ -152,16 +152,19 @@ test_package(){
 # generate a warning
 
 make_check() {
-  if [ $# -eq 2 ] ; then
-    if [ $(/bin/echo "$1" \| /bin/grep -qcwE '^[1-9][0-9]*(_[1-9][0-9]*)*$') -eq 1 ]; then
-      check_ref=$(echo "$1" | sed -e "s/_/./g")
+  local val_chk
+  if [[ "$#" -eq 2 ]]; then
+    # validate the test number reference is of the correct format
+    val_chk=$(/bin/echo "$1" \| /bin/grep -cwE '^[1-9][0-9]*(_[1-9][0-9]*)*$')
+    if [[ "${val_chk}" -eq 1 ]]; then # one valid result
+      check_ref=${1//_/.}             # convert _ to .
       id_ref="$1"
       desc_ref="$2"
       check_desc="$check_ref - $desc_ref"
       starttestjson "$id_ref" "$desc_ref"
 
       totalChecks=$((totalChecks + 1))
-      if check_"${id_ref}" -eq 0; then
+      if check_"${id_ref}" -eq 0; then # call by reference
         pass "$check_desc"
         resulttestjson "PASS"
         currentScore=$((currentScore + 1))
