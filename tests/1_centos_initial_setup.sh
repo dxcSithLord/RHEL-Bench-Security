@@ -80,7 +80,7 @@ check_1_1_1_x() {
       currentScore=$((currentScore + 1))
     fi
   else
-    echo "wrong number of arguments - expectged subtest and filesystem"
+    echo "wrong number of arguments - expected subtest and filesystem"
   fi
 }
 
@@ -117,7 +117,7 @@ check_1_1_2() {
   local resval
   local my_file
   resval=0
-  my_file=(test_mount_point '/tmp')
+  my_file=$(test_mount_point '/tmp')
   if (( my_file == 1 )); then
     resval=1
   fi
@@ -167,18 +167,22 @@ check_1_1_5() {
 # 1.1.6 Ensure separate partition exists for /var (Scored)
 
 check_1_1_6() {
+  local resval
+  local my_file
   resval=0
-  file=test_mount_point "/var"
-  if [ $file -eq 1 ]; then
+  my_file=$(test_mount_point '/var')
+  if (( my_file == 1 )); then
     resval=1
   fi
   return $resval
-
 }
+
 check_1_1_7() {
+  local resval
+  local my_file
   resval=0
-  file=test_mount_point "/var/tmp"
-  if [ $file -eq 1 ]; then
+  my_file=$(test_mount_point '/var/tmp')
+  if (( my_file == 1 )); then
     resval=1
   fi
   return $resval
@@ -213,8 +217,8 @@ check_1_1_10() {
 
 check_1_1_11() {
   resval=0
-  file=test_mount_point "/var/log"
-  if [ $file -eq 1 ]; then
+  my_file=$(test_mount_point "/var/log")
+  if [ $my_file -eq 1 ]; then
     resval=1
   fi
   return $resval

@@ -153,10 +153,10 @@ test_package(){
 
 make_check() {
   local val_chk
-  if [[ "$#" -eq 2 ]]; then
+  if [ $# -eq 2 ]; then
     # validate the test number reference is of the correct format
     val_chk=$(/bin/echo "$1" | /bin/grep -cwE '^[1-9][0-9]*(_[1-9][0-9]*)*$')
-    if [[ "${val_chk}" -eq 1 ]]; then # one valid result
+    if [ $((val_chk)) -eq 1 ]; then # one valid result
       check_ref=${1//_/.}             # convert _ to .
       id_ref="$1"
       desc_ref="$2"
