@@ -37,20 +37,21 @@ test_mount_point() {
 }
 
 test_mount_opt() {
-  local retval
-  local opts
-  local my_mnt
+  #local retval
+  #local opts
+  #local my_mnt
   # Used by checks 1.1.3 to 1.1.5
-  retval=1
-  printf "Checking %s mount option %s ... \n" "$1" "$2"
-  my_mnt=$1
-  opts=$2
+  #retval=1
+  # printf "Checking %s mount option %s ... \n" "$1" "$2"
+  #my_mnt=$1
+  #opts=$2
   # match mount point name - leading "/" in $1, followed by a space
   # followed by a non-greedy any characters up to open paren or comma " (.*)[(,]"
   # followed by the keyword and comma or close paren ${opts}[,)]
-  if /bin/mount | /bin/grep -qE "on ${my_mnt} (.*)[(,]${opts}[,)]"; then
-    retval=0
-  fi
+  # if /bin/mount | /bin/grep -qE "on ${my_mnt} (.*)[(,]${opts}[,)]"; then
+  #  retval=0
+  #fi
+  /bin/mount | /bin/grep -qE "on ${1} (.*)[(,]${2}[,)]"
   return $retval
 }
 
