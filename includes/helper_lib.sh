@@ -153,7 +153,7 @@ test_package(){
 
 make_check() {
   if [ $# -eq 2 ] ; then
-    if [ "$(/bin/echo "$1" \| /bin/grep -qcwE '^[1-9][0-9]*(_[1-9][0-9]*)*$')" -eq 1 ]; then
+    if [ $(/bin/echo "$1" \| /bin/grep -qcwE '^[1-9][0-9]*(_[1-9][0-9]*)*$') -eq 1 ]; then
       check_ref=$(echo "$1" | sed -e "s/_/./g")
       id_ref="$1"
       desc_ref="$2"
