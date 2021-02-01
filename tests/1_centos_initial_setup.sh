@@ -111,7 +111,7 @@ remedy_1_1_2() {
 }
 
 check_1_1_2() {
-  retval=test_mount_point '/tmp'
+  test_mount_point '/tmp'
   return $?
 }
 
@@ -145,113 +145,61 @@ check_1_1_5() {
 # 1.1.6 Ensure separate partition exists for /var (Scored)
 
 check_1_1_6() {
-  local resval
-  local my_file
-  resval=0
-  my_file=$(test_mount_point '/var')
-  if (( my_file == 1 )); then
-    resval=1
-  fi
-  return $resval
+  test_mount_point '/var'
+  return $?
 }
 
 check_1_1_7() {
-  local resval
-  local my_file
-  resval=0
-  my_file=$(test_mount_point '/var/tmp')
-  if (( my_file == 1 )); then
-    resval=1
-  fi
-  return $resval
+  test_mount_point '/var/tmp'
+  return $?
 
 }
 
 check_1_1_8() {
-  if test_mount_opt "/var/tmp" "nodev"; then
-    resval=0
-  else
-    resval=1
-  fi
-  return $resval
+  test_mount_opt "/var/tmp" "nodev"
+  return $?
 }
 
 check_1_1_9() {
-  if test_mount_opt "/var/tmp" "nosuid"; then
-    resval=0
-  else
-    resval=1
-  fi
-  return $resval
+  test_mount_opt "/var/tmp" "nosuid"
+  return $?
 }
 check_1_1_10() {
-  if test_mount_opt "/var/tmp" "noexec"; then
-    resval=0
-  else
-    resval=1
-  fi
-  return $resval
+  test_mount_opt "/var/tmp" "noexec"
+  return $?
 }
 
 check_1_1_11() {
-  resval=0
-  my_file=$(test_mount_point "/var/log")
-  if [ $my_file -eq 1 ]; then
-    resval=1
-  fi
-  return $resval
-
+  test_mount_point "/var/log"
+  return $?
 }
 check_1_1_12() {
-  resval=0
-  if [ $file -eq 1 ]; then
-    resval=1
-  fi
-  return $resval
+  test_mount_point "/var/log/audit"
+  return $?
 }
 
 check_1_1_13() {
-  resval=0
-  file=test_mount_point "/home"
-  if [ $file -eq 1 ]; then
-    resval=1
-  fi
-  return $resval
+  test_mount_point "/home"
+  return $?
 }
 
 check_1_1_14() {
-  if test_mount_opt "/home" "nodev"; then
-    resval=0
-  else
-    resval=1
-  fi
-  return $resval
+  test_mount_opt "/home" "nodev"
+  return $?
 }
 
 check_1_1_15() {
-  if test_mount_opt "/dev/shm" "nodev"; then
-    resval=0
-  else
-    resval=1
-  fi
-  return $resval
+  test_mount_opt "/dev/shm" "nodev"
+  return $?
 }
 
 check_1_1_16() {
-  if test_mount_opt "/dev/shm" "nosuid"; then
-    resval=0
-  else
-    resval=1
-  fi
-  return $resval
+  test_mount_opt "/dev/shm" "nosuid"
+  return $?
 }
 check_1_1_17() {
-  if test_mount_opt "/dev/shm" "noexec"; then
-    resval=0
-  else
-    resval=1
-  fi
-  return $resval
+  test_mount_opt "/dev/shm" "noexec"
+  return $?
 }
 cat - <<EOF
 # 1.1.18 Ensure nodev is set on Rmovable media partitions (not scored)
