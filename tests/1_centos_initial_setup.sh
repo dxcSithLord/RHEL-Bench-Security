@@ -45,13 +45,10 @@ test_mount_opt() {
   printf "Checking %s mount option %s ... \n" "$1" "$2"
   my_mnt=$1
   opts=$2
-  # match mount point name - no leading "/" in $1, followed by a space
-  # followed by a non-greedy any characters up to open paren " \(.*\)("
-  # followed by any number of characters  \(.*\)
-  # up to zero or more comma [,]*
-  # followed by the keyword and zero or more comma ${opts}[,]*
-  # followed by any number of characters up to close paren  \(.*\))
-  if /bin/mount | /bin/grep -qE "${my_mnt} \(.*\)(\(.*\)[,]*${opts}[,]*\(.*\))"; then
+  # match mount point name - leading "/" in $1, followed by a space
+  # followed by a non-greedy any characters up to open paren or comma " (.*)[(,]"
+  # followed by the keyword and comma or close paren ${opts}[,)]
+  if /bin/mount | /bin/grep -qE "on ${my_mnt} (.*)[(,]${opts}[,)]"; then
     retval=0
   fi
   return $retval
