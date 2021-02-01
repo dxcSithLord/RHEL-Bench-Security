@@ -111,7 +111,8 @@ remedy_1_1_2() {
 }
 
 check_1_1_2() {
-  return $(test_mount_point '/tmp')
+  retval=test_mount_point '/tmp'
+  return $?
 }
 
 remedy_1_1_3() {
@@ -129,21 +130,17 @@ remedy_1_1_3() {
 }
 
 check_1_1_3() {
-  retval=$(test_mount_opt "/tmp" "nodev")
-  return "$retval"
+  test_mount_opt "/tmp" "nodev"
+  return $?
 }
 
 check_1_1_4() {
-  retval=$(test_mount_opt "/tmp" "nosuid")
-  return $retval
+  test_mount_opt "/tmp" "nosuid"
+  return $?
 }
 check_1_1_5() {
-  if test_mount_opt "/tmp" "noexec"; then
-    resval=0
-  else
-    resval=1
-  fi
-  return $resval
+  test_mount_opt "/tmp" "noexec"
+  return $?
 }
 # 1.1.6 Ensure separate partition exists for /var (Scored)
 
