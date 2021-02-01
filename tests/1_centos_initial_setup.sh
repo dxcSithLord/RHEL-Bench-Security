@@ -52,7 +52,7 @@ test_mount_opt() {
   #  retval=0
   #fi
   /bin/mount | /bin/grep -qE "on ${1} (.*)[(,]${2}[,)]"
-  return $retval
+  return $?
 }
 
 # 1.1.1.x
