@@ -129,16 +129,11 @@ remedy_1_1_3() {
 }
 
 check_1_1_3() {
-  return test_mount_opt "/tmp" "nodev"
+  return $(test_mount_opt "/tmp" "nodev")
 }
 
 check_1_1_4() {
-  if test_mount_opt "/tmp" "nosuid"; then
-    resval=0
-  else
-    resval=1
-  fi
-  return $resval
+  return $(test_mount_opt "/tmp" "nosuid")
 }
 check_1_1_5() {
   if test_mount_opt "/tmp" "noexec"; then
