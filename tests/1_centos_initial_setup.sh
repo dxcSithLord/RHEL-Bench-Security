@@ -30,7 +30,7 @@ test_mount_point() {
   totalChecks=$((totalChecks + 1))
   #do_version_check "$docker_current_version" "$docker_version"
 
-  if /bin/mount \| /bin/grep "on ${subfs}" >/dev/null 2>&1; then
+  if /bin/mount | /bin/grep "on ${subfs}" >/dev/null 2>&1; then
     retval=0
   fi
   return $retval
@@ -42,7 +42,7 @@ test_mount_opt() {
   local my_mnt
   # Used by checks 1.1.3 to 1.1.5
   retval=1
-  printf "Checking %s mount option %s ... " "$1" "$2"
+  printf "Checking %s mount option %s ... \n" "$1" "$2"
   my_mnt=$1
   opts=$2
   # match mount point name - no leading "/" in $1, followed by a space
@@ -51,7 +51,7 @@ test_mount_opt() {
   # up to zero or more comma [,]*
   # followed by the keyword and zero or more comma ${opts}[,]*
   # followed by any number of characters up to close paren  \(.*\))
-  if /bin/mount | /bin/grep -qE "/${my_mnt} \(.*\)(\(.*\)[,]*${opts}[,]*\(.*\))"; then
+  if /bin/mount | /bin/grep -qE "${my_mnt} \(.*\)(\(.*\)[,]*${opts}[,]*\(.*\))"; then
     retval=0
   fi
   return $retval
@@ -140,7 +140,7 @@ remedy_1_1_3() {
 }
 
 check_1_1_3() {
-  if test_mount_opt "tmp" "nodev"; then
+  if test_mount_opt "/tmp" "nodev"; then
     resval=0
   else
     resval=1
@@ -149,7 +149,7 @@ check_1_1_3() {
 }
 
 check_1_1_4() {
-  if test_mount_opt tmp nosuid; then
+  if test_mount_opt "/tmp" "nosuid"; then
     resval=0
   else
     resval=1
@@ -157,7 +157,7 @@ check_1_1_4() {
   return $resval
 }
 check_1_1_5() {
-  if test_mount_opt tmp noexec; then
+  if test_mount_opt "/tmp" "noexec"; then
     resval=0
   else
     resval=1
@@ -186,7 +186,7 @@ check_1_1_7() {
 }
 
 check_1_1_8() {
-  if test_mount_opt "var/tmp" "nodev"; then
+  if test_mount_opt "/var/tmp" "nodev"; then
     resval=0
   else
     resval=1
@@ -195,7 +195,7 @@ check_1_1_8() {
 }
 
 check_1_1_9() {
-  if test_mount_opt "var/tmp" "nosuid"; then
+  if test_mount_opt "/var/tmp" "nosuid"; then
     resval=0
   else
     resval=1
@@ -203,7 +203,7 @@ check_1_1_9() {
   return $resval
 }
 check_1_1_10() {
-  if test_mount_opt "var/tmp" "noexec"; then
+  if test_mount_opt "/var/tmp" "noexec"; then
     resval=0
   else
     resval=1
@@ -238,7 +238,7 @@ check_1_1_13() {
 }
 
 check_1_1_14() {
-  if test_mount_opt "home" "nodev"; then
+  if test_mount_opt "/home" "nodev"; then
     resval=0
   else
     resval=1
@@ -247,7 +247,7 @@ check_1_1_14() {
 }
 
 check_1_1_15() {
-  if test_mount_opt "dev/shm" "nodev"; then
+  if test_mount_opt "/dev/shm" "nodev"; then
     resval=0
   else
     resval=1
@@ -256,7 +256,7 @@ check_1_1_15() {
 }
 
 check_1_1_16() {
-  if test_mount_opt "dev/shm" "nosuid"; then
+  if test_mount_opt "/dev/shm" "nosuid"; then
     resval=0
   else
     resval=1
@@ -264,7 +264,7 @@ check_1_1_16() {
   return $resval
 }
 check_1_1_17() {
-  if test_mount_opt "dev/shm" "noexec"; then
+  if test_mount_opt "/dev/shm" "noexec"; then
     resval=0
   else
     resval=1
