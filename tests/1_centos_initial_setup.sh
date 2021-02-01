@@ -111,14 +111,6 @@ remedy_1_1_2() {
 }
 
 check_1_1_2() {
-  #local resval
-  #local my_file
-  #resval=0
-  #my_file=$(test_mount_point '/tmp')
-  #if (( my_file == 1 )); then
-  #  resval=1
-  #fi
-  #return $resval
   return $(test_mount_point '/tmp')
 }
 
@@ -137,12 +129,7 @@ remedy_1_1_3() {
 }
 
 check_1_1_3() {
-  if test_mount_opt "/tmp" "nodev"; then
-    resval=0
-  else
-    resval=1
-  fi
-  return $resval
+  return test_mount_opt "/tmp" "nodev"
 }
 
 check_1_1_4() {
