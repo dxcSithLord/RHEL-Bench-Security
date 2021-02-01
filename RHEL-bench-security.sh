@@ -9,7 +9,7 @@
 # Checks for dozens of common best-practices around deploying Docker containers in production.
 # ------------------------------------------------------------------------------
 
-version='2.2'
+version='2.2.1'
 
 # Load dependencies
 . ./includes/helper_lib.sh
