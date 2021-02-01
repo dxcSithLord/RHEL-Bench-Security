@@ -129,11 +129,13 @@ remedy_1_1_3() {
 }
 
 check_1_1_3() {
-  return $(test_mount_opt "/tmp" "nodev")
+  retval=$(test_mount_opt "/tmp" "nodev")
+  return "$retval"
 }
 
 check_1_1_4() {
-  return $(test_mount_opt "/tmp" "nosuid")
+  retval=$(test_mount_opt "/tmp" "nosuid")
+  return $retval
 }
 check_1_1_5() {
   if test_mount_opt "/tmp" "noexec"; then
