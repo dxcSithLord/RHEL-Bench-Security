@@ -37,9 +37,12 @@ test_mount_point() {
 }
 
 test_mount_opt() {
+  local retval
+  local opts, my_mnt
   # Used by checks 1.1.3 to 1.1.5
   retval=1
   printf "Checking %s mount option %s ... " "$1" "$2"
+  my_mnt=$1
   opts=$2
   # match mount point name - no leading "/" in $1, followed by a space
   # followed by a non-greedy any characters up to open paren " \(.*\)("
@@ -47,7 +50,7 @@ test_mount_opt() {
   # up to zero or more comma [,]*
   # followed by the keyword and zero or more comma ${opts}[,]*
   # followed by any number of characters up to close paren  \(.*\))
-  if mount \| grep -q "/${1} \(.*\)(\(.*\)[,]*${opts}[,]*\(.*\))"; then
+  if mount \| grep -q "/${my_mnt} \(.*\)(\(.*\)[,]*${opts}[,]*\(.*\))" >> /dev/null; then
     retval=0
   fi
   return $retval
@@ -110,9 +113,11 @@ remedy_1_1_2() {
 }
 
 check_1_1_2() {
+  local resval
+  local my_file
   resval=0
-  file=test_mount_point "/tmp"
-  if [ $file -eq 1 ]; then
+  my_file=(test_mount_point '/tmp')
+  if (( my_file == 1 )); then
     resval=1
   fi
   return $resval

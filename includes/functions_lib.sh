@@ -4,7 +4,7 @@ host_configuration() {
   check_L1   "1"      "Initial Setup"
   check_L2   "1_1"    "Filesystem Configuration"
   check_L2   "1_1_1"  "Disable unused filesystems"
-  check_l2   "1_1_1_1" "Filesystems disabled"
+  check_L2   "1_1_1_1" "Filesystems disabled"
   check_1_1_1_x 1 "cramfs"
   check_1_1_1_x 2 "freevxfs"
   check_1_1_1_x 3 "jffs2"

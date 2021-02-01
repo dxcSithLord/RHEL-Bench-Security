@@ -1,4 +1,6 @@
 #!/bin/sh
+# https://github.com/dxcSithLord/RHEL-Bench-Security/archive/master.zip
+# https://github.com/dxcSithLord/RHEL-Bench-Security.git
 # ------------------------------------------------------------------------------
 # Docker Bench for Security
 #
@@ -49,7 +51,7 @@ EOF
 while getopts bhl:c:e:i:x:t: args
 do
   case $args in
-  b) nocolor="nocolor";;
+  b) export nocolor="nocolor";;
   h) usage; exit 0 ;;
   l) logger="$OPTARG" ;;
   c) check="$OPTARG" ;;
@@ -64,7 +66,7 @@ if [ -z "$logger" ]; then
   logger="${myname}.log"
 fi
 
-# Load output formating
+# Load output formatting
 . ./includes/output_lib.sh
 
 yell_info
@@ -85,7 +87,13 @@ currentScore=0
 logit "Initializing $(date)\n"
 beginjson "$version" "$(date +%s)"
 
-# Load all the tests from tests/ and run them
+
+#######################################
+# Description: Load all the tests from tests/ and run them.
+# Globals:
+# Arguments:
+#   $@
+#######################################
 main () {
   # Get configuration location
 
@@ -119,7 +127,7 @@ main () {
     containers=$(docker ps | sed '1d' | awk '{print $NF}' | grep -v "$benchcont")
     images=$(docker images -q | grep -v "$benchcont")
   fi
-
+  # images unused?
   if [ -z "$containers" ]; then
     running_containers=0
   else

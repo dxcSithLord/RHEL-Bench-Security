@@ -118,7 +118,8 @@ test_package(){
 }
 
 #
-# This is a generic replacement for all the "check_*" functions that repeat most of the same code
+# This is a generic replacement for all the "check_*" functions that
+# repeat most of the same code
 # reducing the overall length significantly and avoiding repeat errors
 #
 # The quoted values are from the grep string expression below
@@ -151,25 +152,29 @@ test_package(){
 # generate a warning
 
 make_check() {
-  if echo "$1" \| grep -cwE '^[1-9][0-9]*(_[1-9][0-9]*)*$' -eq 1; then
-    check_ref=$(echo "$1" | sed -e "s/_/./g")
-    id_ref="$1"
-    desc_ref="$2"
-    check_desc="$check_ref - $desc_ref"
-    starttestjson "$id_ref" "$desc_ref"
+  if (( $# == 2 )) ; then
+    if echo "$1" \| grep -cwE '^[1-9][0-9]*(_[1-9][0-9]*)*$' -eq 1; then
+      check_ref=$(echo "$1" | sed -e "s/_/./g")
+      id_ref="$1"
+      desc_ref="$2"
+      check_desc="$check_ref - $desc_ref"
+      starttestjson "$id_ref" "$desc_ref"
 
-    totalChecks=$((totalChecks + 1))
-    if check_${id_ref} -eq 0; then
-      pass "$check_desc"
-      resulttestjson "PASS"
-      currentScore=$((currentScore + 1))
+      totalChecks=$((totalChecks + 1))
+      if check_${id_ref} -eq 0; then
+        pass "$check_desc"
+        resulttestjson "PASS"
+        currentScore=$((currentScore + 1))
+      else
+        warn "$check_desc"
+        resulttestjson "WARN"
+        currentScore=$((currentScore - 1))
+      fi
     else
-      warn "$check_desc"
-      resulttestjson "WARN"
-      currentScore=$((currentScore - 1))
+      warn "$1 - test reference syntax invalid; Description: $2"
     fi
   else
-    warn "$1 - test reference syntax invalid; Description: $2"
+    warn "Expect 2 arguments got $#"
   fi
 }
 #example_check_call(){
