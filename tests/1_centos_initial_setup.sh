@@ -30,7 +30,7 @@ test_mount_point() {
   totalChecks=$((totalChecks + 1))
   #do_version_check "$docker_current_version" "$docker_version"
 
-  if mount \| grep "${subfs}" >/dev/null 2>&1; then
+  if /bin/mount \| /bin/grep "on ${subfs}" >/dev/null 2>&1; then
     retval=0
   fi
   return $retval
@@ -50,7 +50,7 @@ test_mount_opt() {
   # up to zero or more comma [,]*
   # followed by the keyword and zero or more comma ${opts}[,]*
   # followed by any number of characters up to close paren  \(.*\))
-  if mount \| grep -q "/${my_mnt} \(.*\)(\(.*\)[,]*${opts}[,]*\(.*\))" >> /dev/null; then
+  if /bin/mount \| /bin/grep -qE "/${my_mnt} \(.*\)(\(.*\)[,]*${opts}[,]*\(.*\))"; then
     retval=0
   fi
   return $retval
@@ -139,7 +139,7 @@ remedy_1_1_3() {
 }
 
 check_1_1_3() {
-  if test_mount_opt tmp nodev; then
+  if test_mount_opt "tmp" "nodev"; then
     resval=0
   else
     resval=1
