@@ -25,8 +25,18 @@ check_3_1_1() {
   else
     retval=$((retval + 1))
   fi
-  if grep -c "net\.ipv4\.ip_forward" /etc/sysctl.conf /etc/sysctl.d/* -eq 1; then
-    if grep -c "net\.ipv4\.ip_forward[  ]*=[  ]*0" /etc/sysctl.conf /etc/sysctl.d/* -eq 1; then
+  xlst=$(grep -chE "net\.ipv4\.ip_forward" /etc/sysctl.conf /etc/sysctl.d/*)
+  cnt=0
+  for y in $xlst; do
+    cnt=$(( y + cnt ))
+  done
+  if  $cnt -eq 1; then
+    xlst=$(grep -chE "net\.ipv4\.ip_forward[  ]*=[  ]*0" /etc/sysctl.conf /etc/sysctl.d/*)
+    cnt=0
+    for y in $xlst; do
+      cnt=$(( y + cnt ))
+    done
+    if $cnt -eq 1; then
       retval=$((retval + 0))
     # net.ipv4.ip_forward = 0
     else
