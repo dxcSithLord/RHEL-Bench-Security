@@ -10,52 +10,52 @@ NTP_SRV='/usr/lib/systemd/system/ntpd.service'
 CHRONY_CONF='/etc/chrony.conf'
 CHRONY_SYSCON='/etc/sysconfig/chronyd'
 LIMITS_CNF='/etc/security/limits.conf'
-SYSCTL_CNF='/etc/sysctl.conf'
-CENTOS_REL='/etc/centos-release'
-REDHAT_REL='/etc/redhat-release'
-HOSTS_ALLOW='/etc/hosts.allow'
+export SYSCTL_CNF='/etc/sysctl.conf'
+export CENTOS_REL='/etc/centos-release'
+export REDHAT_REL='/etc/redhat-release'
+export HOSTS_ALLOW='/etc/hosts.allow'
 HOSTS_DENY='/etc/hosts.deny'
-CIS_CNF='/etc/modprobe.d/CIS.conf'
+export CIS_CNF='/etc/modprobe.d/CIS.conf'
 RSYSLOG_CNF='/etc/rsyslog.conf'
 SYSLOGNG_CONF='/etc/syslog-ng/syslog-ng.conf'
 AUDITD_CNF='/etc/audit/auditd.conf'
 AUDIT_RULES='/etc/audit/audit.rules'
-LOGR_SYSLOG='/etc/logrotate.d/syslog'
-ANACRONTAB='/etc/anacrontab'
-CRONTAB='/etc/crontab'
-CRON_HOURLY='/etc/cron.hourly'
-CRON_DAILY='/etc/cron.daily'
-CRON_WEEKLY='/etc/cron.weekly'
-CRON_MONTHLY='/etc/cron.monthly'
-CRON_DIR='/etc/cron.d'
+export LOGR_SYSLOG='/etc/logrotate.d/syslog'
+export ANACRONTAB='/etc/anacrontab'
+export CRONTAB='/etc/crontab'
+export CRON_HOURLY='/etc/cron.hourly'
+export CRON_DAILY='/etc/cron.daily'
+export CRON_WEEKLY='/etc/cron.weekly'
+export CRON_MONTHLY='/etc/cron.monthly'
+export CRON_DIR='/etc/cron.d'
 AT_ALLOW='/etc/at.allow'
 AT_DENY='/etc/at.deny'
 CRON_ALLOW='/etc/cron.allow'
 CRON_DENY='/etc/cron.deny'
 SSHD_CFG='/etc/ssh/sshd_config'
-SYSTEM_AUTH='/etc/pam.d/system-auth'
+export SYSTEM_AUTH='/etc/pam.d/system-auth'
 PWQUAL_CNF='/etc/security/pwquality.conf'
-PASS_AUTH='/etc/pam.d/password-auth'
-PAM_SU='/etc/pam.d/su'
-GROUP='/etc/group'
-LOGIN_DEFS='/etc/login.defs'
-PASSWD='/etc/passwd'
-SHADOW='/etc/shadow'
-GSHADOW='/etc/gshadow'
-BASHRC='/etc/bashrc'
-PROF_D='/etc/profile.d'
-MOTD='/etc/motd'
-ISSUE='/etc/issue'
-ISSUE_NET='/etc/issue.net'
-GDM_PROFILE='/etc/dconf/profile/gdm'
-GDM_BANNER_MSG='/etc/dconf/db/gdm.d/01-banner-message'
+export PASS_AUTH='/etc/pam.d/password-auth'
+export PAM_SU='/etc/pam.d/su'
+export GROUP='/etc/group'
+export LOGIN_DEFS='/etc/login.defs'
+export PASSWD='/etc/passwd'
+export SHADOW='/etc/shadow'
+export GSHADOW='/etc/gshadow'
+export BASHRC='/etc/bashrc'
+export PROF_D='/etc/profile.d'
+export MOTD='/etc/motd'
+export ISSUE='/etc/issue'
+export ISSUE_NET='/etc/issue.net'
+export GDM_PROFILE='/etc/dconf/profile/gdm'
+export GDM_BANNER_MSG='/etc/dconf/db/gdm.d/01-banner-message'
 RESCUE_SRV='/usr/lib/systemd/system/rescue.service'
 
 # This will cause the tests that take a long time (are slow) to be skipped
 if [[ "$BENCH_SKIP_SLOW" == "1" ]]; then
-  DO_SKIP_SLOW=1
+  export DO_SKIP_SLOW=1
 else
-  DO_SKIP_SLOW=0
+  export DO_SKIP_SLOW=0
 fi
 
 test_module_disabled() {
@@ -77,8 +77,22 @@ test_mount_option() {
 
 test_system_file_perms() {
   local dirs
-  dirs="$(rpm -Va --nomtime --nosize --nomd5 --nolinkto)"
-  [[ -z "${dirs}" ]] || return
+  rpm -Va --nomtime --nosize --nomd5 --nolinkto | tee rpm_package_check.list | \
+  awk '{print $NF}' | while read -r line; do
+    echo "Current File permissions:"
+    ls -al "${line}"
+    pkg_name=$(rpm -qf "${line}")
+    if [[ -n $pkg_name ]]; then
+      echo "Package $pkg_name expected file permissions:"
+      rpm -qlv "${pkg_name}" | grep "${line}"
+    fi
+  done
+  if [[ -z "${dirs}" ]]; then
+    return
+  else
+    awk '{print $NF}' "${dirs}"
+  fi
+
 }
 #
 # swapped  {''} order in awk statemments to  '{ }'
