@@ -1,6 +1,6 @@
 # RedHat Bench for Security
 
-![RedHat Bench for Security running](https://raw.githubusercontent.com/dxcSithLord/RHEL-Bench-Security/master/benchmark_log.png "RHEL 7 Bench for Security running")
+RHEL 7 Bench for Security running
 
 This work is based on the Docker Bench for Security and uses the same structure
 for tests and results.
@@ -58,6 +58,3 @@ git clone https://github.com/dxcSithLord/RHEL-bench-security.git
 cd RHEL-bench-security
 sudo sh RHEL-bench-security.sh
 ```
-
-This script was built to be POSIX 2004 compliant, so it should be portable
-across any Unix platform.
