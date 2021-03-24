@@ -35,16 +35,16 @@ check `/etc/audit/audit.rules` to see if a rule is present instead.
 ```
 
 By default the RHEL Bench for Security script will run all available CIS tests
-and produce logs in the current directory named `docker-bench-security.sh.log.json`
-and `docker-bench-security.sh.log`.
+and produce logs in the current directory named `RHEL-bench-security.sh.log.json`
+and `RHEL-bench-security.sh.log`.
 The CIS based checks are named `check_<section>_<number>`, e.g. `check_2_6`
 and community contributed checks are named `check_c_<number>`.
 A complete list of checks are present in [functions_lib.sh](includes/functions_lib.sh).
 
-`sh docker-bench-security.sh -l /tmp/docker-bench-security.sh.log -c check_2_2`
+`sh RHEL-bench-security.sh -l /tmp/RHEL-bench-security.sh.log -c check_2_2`
 will only run check `2.2 Ensure the logging level is set to 'info'`.
 
-`sh docker-bench-security.sh -l /tmp/docker-bench-security.sh.log -e check_2_2`
+`sh RHEL-bench-security.sh -l /tmp/RHEL-bench-security.sh.log -e check_2_2`
 will run all available checks except `2.2 Ensure the logging level is set to 'info'`.
 
 Note that when submitting checks, provide information why it is a
@@ -52,38 +52,11 @@ reasonable test to add and please include some kind of official documentation
 verifying that information.
 
 ## TO UPDATE:
- Building Docker Bench for Security
-
-If you wish to build and run this container yourself, you can follow the
-following steps:
-
-```sh
-git clone https://github.com/docker/docker-bench-security.git
-cd docker-bench-security
-docker build --no-cache -t docker-bench-security .
-docker run -it --net host --pid host --cap-add audit_control \
-    -e DOCKER_CONTENT_TRUST=$DOCKER_CONTENT_TRUST \
-    -v /var/lib:/var/lib:ro \
-    -v /var/run/docker.sock:/var/run/docker.sock:ro \
-    -v /usr/lib/systemd:/usr/lib/systemd:ro \
-    -v /etc:/etc:ro --label docker_bench_security \
-    docker-bench-security
-```
-
-or use [Docker Compose](https://docs.docker.com/compose/):
-
-```sh
-git clone https://github.com/docker/docker-bench-security.git
-cd docker-bench-security
-docker-compose run --rm docker-bench-security
-```
-
-Also, this script can also be simply run from your base host by running:
-
-```sh
-git clone https://github.com/docker/docker-bench-security.git
-cd docker-bench-security
-sudo sh docker-bench-security.sh
+This script can also be simply run from your base host by running:
+'''sh
+git clone https://github.com/dxcSithLord/RHEL-bench-security.git
+cd RHEL-bench-security
+sudo sh RHEL-bench-security.sh
 ```
 
 This script was built to be POSIX 2004 compliant, so it should be portable
