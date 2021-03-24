@@ -53,7 +53,7 @@ verifying that information.
 
 ## TO UPDATE:
 This script can also be simply run from your base host by running:
-'''sh
+```sh
 git clone https://github.com/dxcSithLord/RHEL-bench-security.git
 cd RHEL-bench-security
 sudo sh RHEL-bench-security.sh
